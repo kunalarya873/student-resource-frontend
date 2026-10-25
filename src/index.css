@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Canvas: a warm, paper-like near-white — scholarly, calm, not stark */
+    --background: 40 33% 97%;
+    --foreground: 210 24% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 16%;
+
+    /* Primary: deep teal — trustworthy, archival, distinct from SaaS indigo */
+    --primary: 182 52% 24%;
+    --primary-foreground: 170 40% 97%;
+
+    --secondary: 40 22% 93%;
+    --secondary-foreground: 210 22% 22%;
+
+    --muted: 40 18% 93%;
+    --muted-foreground: 212 12% 46%;
+
+    /* Accent: soft teal tint for hovers/selection */
+    --accent: 180 38% 91%;
+    --accent-foreground: 182 52% 20%;
+
+    --destructive: 2 68% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 46% 34%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 40 16% 87%;
+    --input: 40 16% 84%;
+    --ring: 182 52% 30%;
+
+    --radius: 0.7rem;
+  }
+
+  .dark {
+    --background: 206 28% 9%;
+    --foreground: 40 22% 92%;
+
+    --card: 206 24% 12%;
+    --card-foreground: 40 22% 92%;
+
+    --popover: 206 24% 12%;
+    --popover-foreground: 40 22% 92%;
+
+    --primary: 176 48% 46%;
+    --primary-foreground: 206 30% 8%;
+
+    --secondary: 206 18% 18%;
+    --secondary-foreground: 40 20% 90%;
+
+    --muted: 206 16% 18%;
+    --muted-foreground: 210 12% 62%;
+
+    --accent: 190 30% 20%;
+    --accent-foreground: 176 48% 72%;
+
+    --destructive: 2 62% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 40% 44%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 206 16% 22%;
+    --input: 206 16% 24%;
+    --ring: 176 48% 46%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  /* Visible, on-brand focus ring for keyboard users */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

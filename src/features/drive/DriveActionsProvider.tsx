@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/AuthContext'
-import { ShareDialog } from '@/features/sharing/ShareDialog'
 import { getApiErrorMessage } from '@/lib/api'
 
 import { driveApi } from './driveApi'
@@ -37,7 +36,6 @@ interface DriveActionsValue {
   promptNewFolder: () => void
   promptRename: (item: DriveTarget) => void
   promptDelete: (item: DriveTarget) => void
-  promptShare: (item: DriveTarget) => void
 }
 
 const DriveActionsContext = createContext<DriveActionsValue | null>(null)
@@ -51,7 +49,6 @@ type ActiveDialog =
   | { type: 'create' }
   | { type: 'rename'; item: DriveTarget }
   | { type: 'delete'; item: DriveTarget }
-  | { type: 'share'; item: DriveTarget }
   | null
 
 export function DriveActionsProvider({
@@ -75,7 +72,6 @@ export function DriveActionsProvider({
       promptNewFolder: () => setDialog({ type: 'create' }),
       promptRename: (item) => setDialog({ type: 'rename', item }),
       promptDelete: (item) => setDialog({ type: 'delete', item }),
-      promptShare: (item) => setDialog({ type: 'share', item }),
     }),
     [],
   )
@@ -107,12 +103,6 @@ export function DriveActionsProvider({
               close()
             }}
           />
-        )}
-      </Dialog>
-
-      <Dialog open={dialog?.type === 'share'} onOpenChange={(o) => !o && close()}>
-        {dialog?.type === 'share' && (
-          <ShareDialog resourceId={dialog.item.id} resourceName={dialog.item.name} />
         )}
       </Dialog>
 

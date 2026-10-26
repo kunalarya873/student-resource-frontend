@@ -1,18 +1,20 @@
-import type { UseQueryResult } from '@tanstack/react-query'
-import { Share2, TriangleAlert, Users } from 'lucide-react'
+import { ListFilter, Share2, TriangleAlert, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
+import { ListControls } from '@/components/drive/ListControls'
+import { LoadMore } from '@/components/drive/LoadMore'
 import { ResourceCard } from '@/components/drive/ResourceCard'
 import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 
-import type { DriveResource } from './types'
-import { useSharedByMe, useSharedWithMe } from './useDrive'
+import { filterResources, sortResources, type SortDir, type SortKey } from './listControls'
+import { useSharedByMe, useSharedWithMe, type SharedResourcesResult } from './useDrive'
 
 interface SharedViewProps {
   title: string
   description: string
-  query: UseQueryResult<DriveResource[]>
+  query: SharedResourcesResult
   emptyIcon: LucideIcon
   emptyTitle: string
   emptyDescription: string
@@ -26,7 +28,17 @@ function SharedView({
   emptyTitle,
   emptyDescription,
 }: SharedViewProps) {
-  const { data, isLoading, isError, refetch } = query
+  const { items: raw, isLoading, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = query
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [filter, setFilter] = useState('')
+
+  const items = useMemo(
+    () => sortResources(filterResources(raw, filter), sortKey, sortDir),
+    [raw, filter, sortKey, sortDir],
+  )
+  const hasAny = raw.length > 0
+  const hasVisible = items.length > 0
 
   return (
     <div className="space-y-6">
@@ -34,6 +46,18 @@ function SharedView({
         <h1 className="font-display text-2xl font-medium tracking-tight">{title}</h1>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
+
+      {hasAny && (
+        <ListControls
+          filter={filter}
+          onFilter={setFilter}
+          sortKey={sortKey}
+          onSortKey={setSortKey}
+          sortDir={sortDir}
+          onToggleDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+          placeholder="Filter these files…"
+        />
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
@@ -52,12 +76,25 @@ function SharedView({
             </Button>
           }
         />
-      ) : data && data.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((r) => (
-            <ResourceCard key={r.resourceId} resource={r} />
-          ))}
+      ) : hasAny && hasVisible ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((r) => (
+              <ResourceCard key={r.resourceId} resource={r} />
+            ))}
+          </div>
+          <LoadMore
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={() => void fetchNextPage()}
+          />
         </div>
+      ) : hasAny && !hasVisible ? (
+        <EmptyState
+          icon={ListFilter}
+          title="No matches"
+          description={`Nothing here matches “${filter}”.`}
+        />
       ) : (
         <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyDescription} />
       )}

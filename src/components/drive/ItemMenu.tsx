@@ -9,10 +9,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useDriveActions, type DriveTarget } from '@/features/drive/DriveActionsProvider'
+import { useShare } from '@/features/sharing/ShareProvider'
 import { cn } from '@/lib/utils'
 
 export function ItemMenu({ item, className }: { item: DriveTarget; className?: string }) {
   const actions = useDriveActions()
+  const share = useShare()
   if (!actions) return null
 
   // Keep clicks off the underlying card (navigate / preview).
@@ -34,8 +36,8 @@ export function ItemMenu({ item, className }: { item: DriveTarget; className?: s
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={stop}>
-        {item.kind === 'resource' && (
-          <DropdownMenuItem onSelect={() => actions.promptShare(item)}>
+        {item.kind === 'resource' && share && (
+          <DropdownMenuItem onSelect={() => share.open({ id: item.id, name: item.name })}>
             <Share2 className="h-4 w-4" aria-hidden="true" /> Share
           </DropdownMenuItem>
         )}

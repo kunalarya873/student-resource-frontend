@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Download, ExternalLink, FileQuestion, Loader2, X } from 'lucide-react'
+import { Download, ExternalLink, FileQuestion, Loader2, Share2, X } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import { FileTypeIcon } from '@/components/drive/FileTypeIcon'
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { driveApi } from '@/features/drive/driveApi'
 import type { ResourceDownloadInfo } from '@/features/drive/types'
+import { useShare } from '@/features/sharing/ShareProvider'
 import { getApiErrorMessage } from '@/lib/api'
 import { formatBytes } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -44,6 +45,7 @@ function isMediaType(ct: string | undefined) {
 }
 
 function PreviewBody({ resourceId, title }: { resourceId: string; title: string }) {
+  const share = useShare()
   // Inline URL renders in the browser (preview); the attachment URL forces a download.
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['download', resourceId, 'inline'],
@@ -72,6 +74,16 @@ function PreviewBody({ resourceId, title }: { resourceId: string; title: string 
           <DialogTitle className="truncate text-base leading-tight">{title}</DialogTitle>
           <DialogDescription className="truncate text-xs">{meta}</DialogDescription>
         </div>
+        {data && share && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="shrink-0"
+            onClick={() => share.open({ id: resourceId, name: title })}
+          >
+            <Share2 className="h-4 w-4" aria-hidden="true" /> Share
+          </Button>
+        )}
         {data && (
           <Button asChild size="sm" variant={data.is_external ? 'default' : 'outline'} className="shrink-0">
             <a

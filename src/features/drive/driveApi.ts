@@ -7,32 +7,34 @@ import type {
   ResourceRead,
 } from './types'
 
+export const PAGE_SIZE = 50
+
 export const driveApi = {
   // Root folders (parent_folder_id = null)
-  rootFolders: () =>
+  rootFolders: (page = 1, limit = PAGE_SIZE) =>
     api
-      .get<PaginatedFolderResponse>('/folders', { params: { limit: 100, sort_by: 'name' } })
+      .get<PaginatedFolderResponse>('/folders', { params: { page, limit, sort_by: 'name' } })
       .then((r) => r.data),
 
-  folderContents: (folderId: string) =>
+  folderContents: (folderId: string, page = 1, limit = PAGE_SIZE) =>
     api
       .get<FolderContentsResponse>(`/folders/${folderId}/contents`, {
-        params: { limit: 100, sort_by: 'name' },
+        params: { page, limit, sort_by: 'name' },
       })
       .then((r) => r.data),
 
   // All resources accessible to the user (used to derive root-level files)
-  listResources: () =>
-    api.get<ResourceRead[]>('/resources', { params: { limit: 100 } }).then((r) => r.data),
+  listResources: (offset = 0, limit = PAGE_SIZE) =>
+    api.get<ResourceRead[]>('/resources', { params: { limit, offset } }).then((r) => r.data),
 
-  sharedWithMe: () =>
+  sharedWithMe: (offset = 0, limit = PAGE_SIZE) =>
     api
-      .get<ResourceRead[]>('/resources/shared-with-me', { params: { limit: 100 } })
+      .get<ResourceRead[]>('/resources/shared-with-me', { params: { limit, offset } })
       .then((r) => r.data),
 
-  sharedByMe: () =>
+  sharedByMe: (offset = 0, limit = PAGE_SIZE) =>
     api
-      .get<ResourceRead[]>('/resources/shared-by-me', { params: { limit: 100 } })
+      .get<ResourceRead[]>('/resources/shared-by-me', { params: { limit, offset } })
       .then((r) => r.data),
 
   downloadInfo: (resourceId: string, inline = false) =>

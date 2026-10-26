@@ -1,9 +1,11 @@
-import { FolderOpen, FolderPlus, TriangleAlert, Upload } from 'lucide-react'
-import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
+import { FolderOpen, FolderPlus, ListFilter, TriangleAlert, Upload } from 'lucide-react'
+import { useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { Breadcrumbs } from '@/components/drive/Breadcrumbs'
 import { FolderCard } from '@/components/drive/FolderCard'
+import { ListControls } from '@/components/drive/ListControls'
+import { LoadMore } from '@/components/drive/LoadMore'
 import { ResourceCard } from '@/components/drive/ResourceCard'
 import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
@@ -12,6 +14,14 @@ import { cn } from '@/lib/utils'
 
 import { DriveActionsProvider, useDriveActions } from './DriveActionsProvider'
 import { DriveDndProvider } from './dnd'
+import {
+  filterFolders,
+  filterResources,
+  sortFolders,
+  sortResources,
+  type SortDir,
+  type SortKey,
+} from './listControls'
 import { useDriveContents } from './useDrive'
 
 export function DrivePage() {
@@ -28,13 +38,40 @@ export function DrivePage() {
 }
 
 function DriveView({ folderKey, isFolder }: { folderKey: string | null; isFolder: boolean }) {
-  const { data, isLoading, isError, refetch, isFetching } = useDriveContents(folderKey)
+  const {
+    folders: rawFolders,
+    resources: rawResources,
+    breadcrumbs,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useDriveContents(folderKey)
   const { startUploads } = useUploads()
   const actions = useDriveActions()
 
   const inputRef = useRef<HTMLInputElement>(null)
   const dragDepth = useRef(0)
   const [dragging, setDragging] = useState(false)
+
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [filter, setFilter] = useState('')
+
+  const folders = useMemo(
+    () => sortFolders(filterFolders(rawFolders, filter), sortKey, sortDir),
+    [rawFolders, filter, sortKey, sortDir],
+  )
+  const resources = useMemo(
+    () => sortResources(filterResources(rawResources, filter), sortKey, sortDir),
+    [rawResources, filter, sortKey, sortDir],
+  )
+
+  const hasAny = rawFolders.length > 0 || rawResources.length > 0
+  const hasVisible = folders.length > 0 || resources.length > 0
 
   function openPicker() {
     inputRef.current?.click()
@@ -77,8 +114,8 @@ function DriveView({ folderKey, isFolder }: { folderKey: string | null; isFolder
     >
       <input ref={inputRef} type="file" multiple className="hidden" onChange={onPicked} />
 
-      <div className="flex items-center justify-between gap-4">
-        <Breadcrumbs trail={data?.breadcrumbs ?? []} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Breadcrumbs trail={breadcrumbs} />
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => actions?.promptNewFolder()}>
             <FolderPlus className="h-4 w-4" aria-hidden="true" />
@@ -90,6 +127,19 @@ function DriveView({ folderKey, isFolder }: { folderKey: string | null; isFolder
           </Button>
         </div>
       </div>
+
+      {/* Sort + filter toolbar — client-side over this folder's items */}
+      {hasAny && (
+        <ListControls
+          filter={filter}
+          onFilter={setFilter}
+          sortKey={sortKey}
+          onSortKey={setSortKey}
+          sortDir={sortDir}
+          onToggleDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+          placeholder="Filter in this folder…"
+        />
+      )}
 
       {isLoading ? (
         <GridSkeleton />
@@ -104,28 +154,40 @@ function DriveView({ folderKey, isFolder }: { folderKey: string | null; isFolder
             </Button>
           }
         />
-      ) : data && (data.folders.length > 0 || data.resources.length > 0) ? (
+      ) : hasAny && hasVisible ? (
         <div className="space-y-8">
-          {data.folders.length > 0 && (
-            <Section title="Folders" count={data.folders.length}>
+          {folders.length > 0 && (
+            <Section title="Folders" count={folders.length}>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {data.folders.map((f) => (
+                {folders.map((f) => (
                   <FolderCard key={f.folderId} folder={f} />
                 ))}
               </div>
             </Section>
           )}
 
-          {data.resources.length > 0 && (
-            <Section title="Files" count={data.resources.length}>
+          {resources.length > 0 && (
+            <Section title="Files" count={resources.length}>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {data.resources.map((r) => (
+                {resources.map((r) => (
                   <ResourceCard key={r.resourceId} resource={r} />
                 ))}
               </div>
             </Section>
           )}
+
+          <LoadMore
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={() => void fetchNextPage()}
+          />
         </div>
+      ) : hasAny && !hasVisible ? (
+        <EmptyState
+          icon={ListFilter}
+          title="No matches"
+          description={`Nothing in this folder matches “${filter}”.`}
+        />
       ) : (
         <EmptyState
           icon={FolderOpen}

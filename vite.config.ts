@@ -17,7 +17,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://15.135.239.91',
         changeOrigin: true,
       },
     },

@@ -8,7 +8,7 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { SignupPage } from '@/features/auth/pages/SignupPage'
 import { VerifyOtpPage } from '@/features/auth/pages/VerifyOtpPage'
 import { DrivePage } from '@/features/drive/DrivePage'
-import { SharedByMePage, SharedWithMePage } from '@/features/drive/SharedPages'
+import { SharedByMePage, SharedWithMePage, TeacherNotesPage } from '@/features/drive/SharedPages'
 import { ProfilePage } from '@/features/profile/ProfilePage'
 import { SearchPage } from '@/features/search/SearchPage'
 
@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/folders/:folderId" element={<DrivePage />} />
           <Route path="/shared" element={<SharedByMePage />} />
           <Route path="/shared-with-me" element={<SharedWithMePage />} />
+          <Route path="/teacher-notes" element={<TeacherNotesPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>

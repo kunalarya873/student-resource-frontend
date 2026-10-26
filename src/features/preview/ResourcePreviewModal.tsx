@@ -79,7 +79,7 @@ function PreviewBody({ resourceId, title }: { resourceId: string; title: string 
             size="sm"
             variant="outline"
             className="shrink-0"
-            onClick={() => share.open({ id: resourceId, name: title })}
+            onClick={() => share.open({ id: resourceId, name: title, kind: 'resource' })}
           >
             <Share2 className="h-4 w-4" aria-hidden="true" /> Share
           </Button>

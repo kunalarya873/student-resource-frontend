@@ -17,32 +17,37 @@ import { Select } from '@/components/ui/select'
 import { getApiErrorMessage } from '@/lib/api'
 import { initials } from '@/lib/format'
 
-import { sharingApi, type SharePermission, type ShareGrant } from './sharingApi'
+import { shareClientFor, type ShareKind, type SharePermission, type ShareGrant } from './sharingApi'
 
 export function ShareDialog({
-  resourceId,
-  resourceName,
+  targetId,
+  targetName,
+  kind,
 }: {
-  resourceId: string
-  resourceName: string
+  targetId: string
+  targetName: string
+  kind: ShareKind
 }) {
   const queryClient = useQueryClient()
+  const client = shareClientFor(kind)
+  const noun = kind === 'folder' ? 'folder' : 'file'
   const [email, setEmail] = useState('')
   const [permission, setPermission] = useState<SharePermission>('VIEW')
   const [fieldError, setFieldError] = useState<string | undefined>()
 
   const grantsQuery = useQuery({
-    queryKey: ['shares', resourceId],
-    queryFn: () => sharingApi.list(resourceId),
+    queryKey: ['shares', kind, targetId],
+    queryFn: () => client.list(targetId),
   })
 
   function invalidate() {
-    void queryClient.invalidateQueries({ queryKey: ['shares', resourceId] })
+    void queryClient.invalidateQueries({ queryKey: ['shares', kind, targetId] })
     void queryClient.invalidateQueries({ queryKey: ['drive', 'shared-by-me'] })
+    void queryClient.invalidateQueries({ queryKey: ['drive', 'shared-folders-with-me'] })
   }
 
   const shareMutation = useMutation({
-    mutationFn: () => sharingApi.share(resourceId, email.trim(), permission),
+    mutationFn: () => client.share(targetId, email.trim(), permission),
     onSuccess: () => {
       setEmail('')
       invalidate()
@@ -50,7 +55,7 @@ export function ShareDialog({
   })
 
   const revokeMutation = useMutation({
-    mutationFn: (accessId: string) => sharingApi.revoke(resourceId, accessId),
+    mutationFn: (accessId: string) => client.revoke(targetId, accessId),
     onSuccess: invalidate,
   })
 
@@ -68,8 +73,12 @@ export function ShareDialog({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Share “{resourceName}”</DialogTitle>
-        <DialogDescription>Give another user access to this file by email.</DialogDescription>
+        <DialogTitle>Share “{targetName}”</DialogTitle>
+        <DialogDescription>
+          {kind === 'folder'
+            ? 'Give another user access to this folder and everything inside it, by email.'
+            : `Give another user access to this ${noun} by email.`}
+        </DialogDescription>
       </DialogHeader>
 
       <form onSubmit={submit} noValidate className="space-y-3">

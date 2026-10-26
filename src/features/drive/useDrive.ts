@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { useAuth } from '@/features/auth/AuthContext'
@@ -114,6 +114,21 @@ export function useSharedByMe() {
   return useSharedResources('shared-by-me', (offset) =>
     driveApi.sharedByMe(offset, PAGE_SIZE).then((rs) => rs.map(fromResource)),
   )
+}
+
+/** Verified teacher/department notes — approved, institutionally-visible resources. */
+export function useTeacherNotes() {
+  return useSharedResources('teacher-notes', (offset) =>
+    driveApi.teacherNotes(offset, PAGE_SIZE).then((rs) => rs.map(fromResource)),
+  )
+}
+
+/** Folders shared with the current user (shown alongside shared files, browsable). */
+export function useSharedFoldersWithMe() {
+  return useQuery({
+    queryKey: ['drive', 'shared-folders-with-me'],
+    queryFn: () => driveApi.sharedFoldersWithMe(0, 100).then((fs) => fs.map(toFolder)),
+  })
 }
 
 export type SharedResourcesResult = ReturnType<typeof useSharedResources>

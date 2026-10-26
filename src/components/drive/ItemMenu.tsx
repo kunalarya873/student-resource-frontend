@@ -36,8 +36,10 @@ export function ItemMenu({ item, className }: { item: DriveTarget; className?: s
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={stop}>
-        {item.kind === 'resource' && share && (
-          <DropdownMenuItem onSelect={() => share.open({ id: item.id, name: item.name })}>
+        {share && (
+          <DropdownMenuItem
+            onSelect={() => share.open({ id: item.id, name: item.name, kind: item.kind })}
+          >
             <Share2 className="h-4 w-4" aria-hidden="true" /> Share
           </DropdownMenuItem>
         )}

@@ -4,9 +4,12 @@ import { Dialog } from '@/components/ui/dialog'
 
 import { ShareDialog } from './ShareDialog'
 
+import type { ShareKind } from './sharingApi'
+
 interface ShareTarget {
   id: string
   name: string
+  kind: ShareKind
 }
 
 interface ShareContextValue {
@@ -33,7 +36,9 @@ export function ShareProvider({ children }: { children: ReactNode }) {
     <ShareContext.Provider value={value}>
       {children}
       <Dialog open={target !== null} onOpenChange={(o) => !o && close()}>
-        {target && <ShareDialog resourceId={target.id} resourceName={target.name} />}
+        {target && (
+          <ShareDialog targetId={target.id} targetName={target.name} kind={target.kind} />
+        )}
       </Dialog>
     </ShareContext.Provider>
   )

@@ -1,5 +1,21 @@
 import { useQuery } from '@tanstack/react-query'
-import { Folder, HardDrive, PanelLeft, Share2, Users } from 'lucide-react'
+import {
+  Award,
+  BadgeCheck,
+  FileText,
+  ExternalLink,
+  Fingerprint,
+  Folder,
+  GraduationCap,
+  HardDrive,
+  IdCard,
+  LibraryBig,
+  Landmark,
+  MonitorCog,
+  PanelLeft,
+  Share2,
+  Users,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
@@ -12,8 +28,66 @@ const PIN_KEY = 'archive.sidebar.pinned'
 
 const navItems = [
   { to: '/', label: 'My Drive', icon: HardDrive, end: true },
+  { to: '/teacher-notes', label: 'Teacher Notes', icon: BadgeCheck, end: false },
   { to: '/shared', label: 'Shared', icon: Share2, end: false },
   { to: '/shared-with-me', label: 'Shared with me', icon: Users, end: false },
+]
+
+const usefulLinks = [
+  {
+    label: 'Admissions & exams',
+    description: 'Application forms, entrance schedules, counselling, and admission notices',
+    url: 'https://www.amucontrollerexams.com',
+    icon: FileText,
+  },
+  {
+    label: 'AMU main website',
+    description: 'AMU services including TPO and DSW',
+    url: 'https://www.amu.ac.in',
+    icon: Landmark,
+  },
+  {
+    label: 'FYUP student portal',
+    description: 'Registration, downloads, attendance, and fee payment for FYUP students',
+    url: 'https://registration.fyup.amucoe.ac.in',
+    icon: GraduationCap,
+  },
+  {
+    label: 'ABC / APAR registration',
+    description: 'Register for an ABC or APAR ID through AMU',
+    url: 'https://www.nep.amuonline.ac.in',
+    icon: BadgeCheck,
+  },
+  {
+    label: 'Create ABC / APAR ID',
+    description: 'Create your ABC or APAR ID',
+    url: 'https://www.abc.gov.in',
+    icon: IdCard,
+  },
+  {
+    label: 'DigiLocker',
+    description: 'Access documents and records in DigiLocker',
+    url: 'https://www.digilocker.gov.in',
+    icon: Fingerprint,
+  },
+  {
+    label: 'Results & R.P.S.',
+    description: 'View semester results and use R.P.S.',
+    url: 'https://www.ccae-amucoe.com',
+    icon: Award,
+  },
+  {
+    label: 'Non-FYUP student portal',
+    description: 'Registration, downloads, attendance, and fee payment for non-FYUP students',
+    url: 'https://www.erp.amucoe.ac.in',
+    icon: MonitorCog,
+  },
+  {
+    label: 'e-Library',
+    description: 'Access the AMU e-Library',
+    url: 'https://amu.refread.com',
+    icon: LibraryBig,
+  },
 ]
 
 export function Sidebar() {
@@ -126,6 +200,38 @@ export function Sidebar() {
             </div>
           </div>
         )}
+
+        <div className="mt-4 border-t border-border pt-3">
+          {expanded && (
+            <p className="px-[11px] pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Useful links
+            </p>
+          )}
+          <div className="flex flex-col gap-0.5">
+            {usefulLinks.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`${link.label}: ${link.description}`}
+                aria-label={`${link.label}: ${link.description}`}
+                className="group flex min-h-9 items-center gap-2.5 rounded-lg px-[11px] py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <link.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {expanded && (
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                )}
+                {expanded && (
+                  <ExternalLink
+                    className="h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70"
+                    aria-hidden="true"
+                  />
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
       </nav>
 
       {/* Quota */}

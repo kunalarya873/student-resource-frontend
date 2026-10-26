@@ -2,6 +2,7 @@ import { api } from '@/lib/api'
 
 import type {
   FolderContentsResponse,
+  FolderRead,
   PaginatedFolderResponse,
   ResourceDownloadInfo,
   ResourceRead,
@@ -35,6 +36,20 @@ export const driveApi = {
   sharedByMe: (offset = 0, limit = PAGE_SIZE) =>
     api
       .get<ResourceRead[]>('/resources/shared-by-me', { params: { limit, offset } })
+      .then((r) => r.data),
+
+  // Verified teacher/department notes = approved, institutionally-visible resources.
+  teacherNotes: (offset = 0, limit = PAGE_SIZE) =>
+    api
+      .get<ResourceRead[]>('/resources', {
+        params: { status: 'APPROVED', limit, offset, sort_by: 'created_at', order: 'desc' },
+      })
+      .then((r) => r.data),
+
+  // Folders explicitly shared with me (browsable subtrees).
+  sharedFoldersWithMe: (offset = 0, limit = PAGE_SIZE) =>
+    api
+      .get<FolderRead[]>('/folders/shared-with-me', { params: { limit, offset } })
       .then((r) => r.data),
 
   downloadInfo: (resourceId: string, inline = false) =>

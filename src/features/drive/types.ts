@@ -43,6 +43,8 @@ export interface FolderRead {
   owner_id: string
   parent_folder_id: string | null
   name: string
+  is_public?: boolean
+  share_token?: string | null
   created_at: string
   updated_at: string
 }
@@ -54,6 +56,8 @@ export interface FolderResourceItem {
   description: string | null
   visibility: string
   status: string
+  is_public?: boolean
+  share_token?: string | null
   created_at: string
 }
 
@@ -90,6 +94,8 @@ export interface RawBreadcrumb {
   folder_id: string
   name: string
 }
+
+export type BreadcrumbItem = RawBreadcrumb
 
 export interface FolderContentsResponse {
   folder: FolderRead

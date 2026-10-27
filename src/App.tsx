@@ -10,11 +10,15 @@ import { VerifyOtpPage } from '@/features/auth/pages/VerifyOtpPage'
 import { DrivePage } from '@/features/drive/DrivePage'
 import { SharedByMePage, SharedWithMePage, TeacherNotesPage } from '@/features/drive/SharedPages'
 import { ProfilePage } from '@/features/profile/ProfilePage'
+import { PublicSharePage } from '@/features/public/PublicSharePage'
 import { SearchPage } from '@/features/search/SearchPage'
 
 export default function App() {
   return (
     <Routes>
+      {/* Public Share Links — accessible to anyone (both guests and signed-in members) */}
+      <Route path="/s/:token" element={<PublicSharePage />} />
+
       {/* Auth pages — redirect away if already signed in */}
       <Route element={<PublicOnlyRoute />}>
         <Route element={<AuthLayout />}>

@@ -22,12 +22,21 @@ interface PaginatedShareGrants {
 export type SharePermission = 'VIEW' | 'EDIT'
 export type ShareKind = 'resource' | 'folder'
 
+export interface PublicLinkInfo {
+  is_public: boolean
+  share_token: string | null
+  share_url: string | null
+  permission: string
+}
+
 /** Uniform sharing client for both resources and folders — same verbs,
  *  different base path, interchangeable in the share dialog. */
 export interface ShareClient {
   list: (id: string) => Promise<PaginatedShareGrants>
   share: (id: string, granteeEmail: string, permission: SharePermission) => Promise<ShareGrant>
   revoke: (id: string, accessId: string) => Promise<unknown>
+  getPublicLink: (id: string) => Promise<PublicLinkInfo>
+  togglePublicLink: (id: string, isPublic: boolean) => Promise<PublicLinkInfo>
 }
 
 function makeShareClient(base: (id: string) => string): ShareClient {
@@ -39,6 +48,9 @@ function makeShareClient(base: (id: string) => string): ShareClient {
         .post<ShareGrant>(`${base(id)}/share`, { grantee_email: granteeEmail, permission })
         .then((r) => r.data),
     revoke: (id, accessId) => api.delete(`${base(id)}/share/${accessId}`).then((r) => r.data),
+    getPublicLink: (id) => api.get<PublicLinkInfo>(`${base(id)}/public-link`).then((r) => r.data),
+    togglePublicLink: (id, isPublic) =>
+      api.post<PublicLinkInfo>(`${base(id)}/public-link`, { is_public: isPublic }).then((r) => r.data),
   }
 }
 
